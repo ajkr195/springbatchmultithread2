@@ -7,14 +7,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.stereotype.Component;
 
-//import org.springframework.batch.core.JobExecution;
-//
-//public interface JobExecutionListener {
-//	 void beforeJob(JobExecution jobExecution);
-//	    void afterJob(JobExecution jobExecution);
-//
-//}
-
 @Component
 public class InterceptingJobExecution implements JobExecutionListener {
 
@@ -22,22 +14,18 @@ public class InterceptingJobExecution implements JobExecutionListener {
 
 	@Override
 	public void beforeJob(JobExecution jobExecution) {
-		//
-		// Can Log || do some business code
-		//
+		System.err.println("Performing another operation - Before Job!");
 		log.info("Intercepting Job Excution - Before Job!");
 	}
 
 	@Override
 	public void afterJob(JobExecution jobExecution) {
-		//
-		// Can Log || do some Business code
-		//
 //		if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 //			// job success
 //		} else if (jobExecution.getStatus() == BatchStatus.FAILED) {
 //			// job failure
 //		}
+		System.err.println("Performing another operation - After Job!");
 		log.info("Intercepting Job Excution - After Job!");
 	}
 
