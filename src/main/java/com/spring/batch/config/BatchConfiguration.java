@@ -93,7 +93,7 @@ public class BatchConfiguration {
 
 	@Autowired
 	private FlatFileItemReader<Sales> salesItemReader;
-	
+
 	@Bean("partitioner")
 	@StepScope
 	public Partitioner partitioner() {
@@ -125,7 +125,7 @@ public class BatchConfiguration {
 	@Bean
 	public TaskExecutor asynctaskExecutor() {
 		SimpleAsyncTaskExecutor asyncTaskExecutor = new SimpleAsyncTaskExecutor("CSV2DB-");
-		asyncTaskExecutor.setConcurrencyLimit(mycustombatchconcurrencysize); //asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
+		asyncTaskExecutor.setConcurrencyLimit(mycustombatchconcurrencysize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
 		return asyncTaskExecutor;
 	}
 
@@ -183,13 +183,13 @@ public class BatchConfiguration {
 	public Step masterStep() {
 		return stepBuilderFactory.get("masterStep").partitioner("step1", partitioner()).step(step1())
 				.taskExecutor(asynctaskExecutor()).taskExecutor(threadpooltaskExecutor())
-				.gridSize(mycustombatchgridsize).build();
+				.gridSize(mycustombatchgridsize).listener(interceptingJob).build();
 	}
 
 	@Bean
 	public Job importSalesJob(JobCompletionNotificationListener listener, Step step1) {
 		return jobBuilderFactory.get("importSalesJob").incrementer(new RunIdIncrementer()).listener(listener)
-				.flow(masterStep()).end().build();
+				.flow(masterStep()).end().listener(interceptingJob).build();
 	}
 
 	@SuppressWarnings("unused")
@@ -200,12 +200,9 @@ public class BatchConfiguration {
 		// attribute.setIsolationLevel(Isolation.DEFAULT.value());
 		// attribute.setTimeout(30);
 		return stepBuilderFactory.get("step1").<Sales, Sales>chunk(mycustombatchchunksize).reader(salesItemReader)
-				.processor(processor())
-				.writer(writer)
-				.taskExecutor(threadpooltaskExecutor())
-				.taskExecutor(asynctaskExecutor())
-				.listener(jobExecutionListener(threadpooltaskExecutor()))
-				.throttleLimit(mycustombatchthrottlelimit)
+				.processor(processor()).writer(writer).taskExecutor(threadpooltaskExecutor())
+				.taskExecutor(asynctaskExecutor()).listener(interceptingJob)
+				.listener(jobExecutionListener(threadpooltaskExecutor())).throttleLimit(mycustombatchthrottlelimit)
 				// .skipLimit(10) //default is set to 0 // .startLimit(1)
 				// .stream(fileItemWriter1())// .stream(fileItemWriter2())
 				// .transactionAttribute(attribute) // .readerIsTransactionalQueue()
@@ -241,7 +238,7 @@ public class BatchConfiguration {
 				// .preventRestart() // By default all jobs are re-startable. Use this if want
 				// to restrict it.
 				.flow(step2).end().listener(interceptingJob).listener(jobExecutionListener(threadpooltaskExecutor()))
-				//.validator(parametersValidator())
+				// .validator(parametersValidator())
 				.build();
 	}
 
@@ -249,29 +246,34 @@ public class BatchConfiguration {
 	public Job importThirdJob(Step step3) {
 		return jobBuilderFactory.get("importThirdJob").incrementer(new RunIdIncrementer())
 				// .preventRestart()
-				.flow(step3).end().build();
+				.flow(step3).end().listener(interceptingJob).listener(jobExecutionListener(threadpooltaskExecutor()))
+				.build();
 	}
 
 	@Bean
 	public Job importFourthJob(Step step4) {
 		return jobBuilderFactory.get("importFourthJob").incrementer(new RunIdIncrementer())
 				// .preventRestart()
-				.flow(step4).end().build();
+				.flow(step4).end().listener(interceptingJob).listener(jobExecutionListener(threadpooltaskExecutor()))
+				.build();
 	}
 
 	@Bean
 	public Step step2() {
-		return stepBuilderFactory.get("step2").tasklet(new TaskOne()).build();
+		return stepBuilderFactory.get("step2").tasklet(new TaskOne()).listener(interceptingJob)
+				.listener(jobExecutionListener(threadpooltaskExecutor())).build();
 	}
 
 	@Bean
 	public Step step3() {
-		return stepBuilderFactory.get("step3").tasklet(new TaskTwo()).build();
+		return stepBuilderFactory.get("step3").tasklet(new TaskTwo()).listener(interceptingJob)
+				.listener(jobExecutionListener(threadpooltaskExecutor())).build();
 	}
 
 	@Bean
 	public Step step4() {
-		return stepBuilderFactory.get("step4").tasklet(new TaskThree()).build();
+		return stepBuilderFactory.get("step4").tasklet(new TaskThree()).listener(interceptingJob)
+				.listener(jobExecutionListener(threadpooltaskExecutor())).build();
 	}
 
 }
