@@ -7,38 +7,46 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SomeRetryableClass {
+	private int retrynpecounter = 0;
+	private int retrynfecounter = 0;
 
-	@SuppressWarnings("null")
 	@Retryable(value = { NumberFormatException.class,
-			NullPointerException.class }, maxAttempts = 5, backoff = @Backoff(delay = 100, maxDelay = 500)) // ) (2000))
-	public String myWeirdMethodWhichCanDitchMeAnytime1(String str) {
-		System.err.println("This is expected behavior..Now you will see a NullPointer Exception......");
-		str = null;
-		str.length();
-		return str;
-
-	} 
-
-	@Recover
-	public void recover(NullPointerException npex) {
-		System.out.println("Recover method - Null Pointer Exception");
+			NullPointerException.class }, maxAttempts = 5, backoff = @Backoff(delay = 1000, maxDelay = 3000)) // )
+																												// (2000))
+	public String myWeirdMethodWhichCanDitchMeAnytime1(String str) throws NullPointerException {
+		retrynpecounter++;
+		System.err.println("Trying to recover from Catastrophy...Retry attempt number - " + retrynpecounter);
+		if (str == null) {
+			throw new NullPointerException();
+		} else {
+			throw new RuntimeException();
+		}
 
 	}
 
-//	public String myWeirdMethodWhichCanDitchMeAnytime2() {
-//		System.err.println("This is expected behavior..Now you will see a NumberFormatException Exception......"); 
-//		Integer.parseInt("");
-//		return "success";
-//
-//	}
-//
-//	@Recover
-//	public void recover(NumberFormatException nfex) {
-//		System.out.println("Recover method - Number format Exception");
-//
-//	}
-	
-	
-	
+	@Recover
+	public String recover(NullPointerException npex) {
+		System.err.println("In Recover method - To recover from Null Pointer Exception");
+		return npex.getClass().getName();
+
+	}
+
+	@Retryable(value = { NumberFormatException.class,
+			NullPointerException.class }, maxAttempts = 5, backoff = @Backoff(delay = 1000, maxDelay = 3000)) // )
+																												// (2000))
+	public String myWeirdMethodWhichCanDitchMeAnytime2() throws NumberFormatException {
+		retrynfecounter++;
+		System.err.println("Trying to recover from Catastrophy...Retry attempt number - " + retrynfecounter);
+		Integer.parseInt("");
+		return "success";
+
+	}
+
+	@Recover
+	public String recover(NumberFormatException nfex) {
+		System.err.println("In Recover method - To recover from Number format Exception");
+		return nfex.getClass().getName();
+
+	}
 
 }
