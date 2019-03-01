@@ -17,7 +17,7 @@ public class SomeRetryableClass {
 		str.length();
 		return str;
 
-	}
+	} 
 
 	@Recover
 	public void recover(NullPointerException npex) {
