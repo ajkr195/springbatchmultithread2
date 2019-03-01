@@ -20,8 +20,6 @@ import org.springframework.batch.core.configuration.support.JobRegistryBeanPostP
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.partition.support.MultiResourcePartitioner;
 import org.springframework.batch.core.partition.support.Partitioner;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 //import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
@@ -29,7 +27,6 @@ import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilde
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
-import org.springframework.batch.item.validator.BeanValidatingItemProcessor;
 //import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,14 +41,20 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 import com.spring.batch.itemprocessor.SalesItemProcessor;
+import com.spring.batch.listener.CustomItemReaderListener;
+import com.spring.batch.listener.CustomItemWriterListener;
+import com.spring.batch.listener.CustomStepListener;
 import com.spring.batch.listener.InterceptingJobExecution;
 import com.spring.batch.listener.JobCompletionNotificationListener;
 import com.spring.batch.model.Sales;
+import com.spring.batch.retry.SomeRetryableClass;
 import com.spring.batch.tasklets.TaskOne;
 import com.spring.batch.tasklets.TaskThree;
 import com.spring.batch.tasklets.TaskTwo;
@@ -93,7 +96,22 @@ public class BatchConfiguration {
 
 	@Autowired
 	private FlatFileItemReader<Sales> salesItemReader;
+	
+	private NumberFormatException nfex;
+	
+	private NullPointerException npex;
+	@Autowired
+	private CustomStepListener stepListner;
+	
+	@Autowired
+	private CustomItemReaderListener itemReaderListner;
 
+	@Autowired
+	private CustomItemWriterListener itemWriterListner;
+	
+	@Autowired
+	private SomeRetryableClass  someRetryableClass;
+	
 	@Bean("partitioner")
 	@StepScope
 	public Partitioner partitioner() {
@@ -187,10 +205,9 @@ public class BatchConfiguration {
 	}
 
 	@Bean
-	public Job importSalesJob(JobCompletionNotificationListener listener, Step step1) {
-		return jobBuilderFactory.get("importSalesJob").incrementer(new RunIdIncrementer()).listener(listener)
-				.flow(masterStep()).end()
-				.build();
+	public Job importSalesJob(JobCompletionNotificationListener jobCompletionListener, Step step1) {
+		return jobBuilderFactory.get("importSalesJob").incrementer(new RunIdIncrementer()).listener(jobCompletionListener)
+				.flow(masterStep()).end().build();
 	}
 
 	@SuppressWarnings("unused")
@@ -202,8 +219,7 @@ public class BatchConfiguration {
 		// attribute.setTimeout(30);
 		return stepBuilderFactory.get("step1").<Sales, Sales>chunk(mycustombatchchunksize).reader(salesItemReader)
 				.processor(processor()).writer(writer).taskExecutor(threadpooltaskExecutor())
-				.taskExecutor(asynctaskExecutor())
-				.throttleLimit(mycustombatchthrottlelimit)
+				.taskExecutor(asynctaskExecutor()).throttleLimit(mycustombatchthrottlelimit)
 				// .skipLimit(10) //default is set to 0 // .startLimit(1)
 				// .stream(fileItemWriter1())// .stream(fileItemWriter2())
 				// .transactionAttribute(attribute) // .readerIsTransactionalQueue()
@@ -211,7 +227,9 @@ public class BatchConfiguration {
 				// .skip(Exception.class)// .noSkip(FileNotFoundException.class)
 				// .retryLimit(3)// .retry(DeadlockLoserDataAccessException.class)
 				// .skip(FlatFileParseException.class) // .writer(compositeItemWriter())
-				.build();
+				.listener(stepListner)
+				.listener(itemReaderListner)
+				.listener(itemWriterListner).build();
 	}
 
 	@Bean
@@ -230,7 +248,9 @@ public class BatchConfiguration {
 			@Override
 			public void afterJob(JobExecution jobExecution) {
 				log.info("This message is \"after\" the job. You might want to do something here - After the job.");
-				System.err.println("This message is \"after\" the job. You might want to do something here - After the job.");
+				
+				System.err.println(
+						"This message is \"after\" the job. You might want to do something here - After the job.");
 				taskExecutor.shutdown();
 			}
 		};
@@ -250,32 +270,37 @@ public class BatchConfiguration {
 	public Job importThirdJob(Step step3) {
 		return jobBuilderFactory.get("importThirdJob").incrementer(new RunIdIncrementer())
 				// .preventRestart()
-				.flow(step3).end().listener(interceptingJob)
-				.build();
+				.flow(step3).end().listener(interceptingJob).build();
 	}
 
 	@Bean
 	public Job importFourthJob(Step step4) {
 		return jobBuilderFactory.get("importFourthJob").incrementer(new RunIdIncrementer())
 				// .preventRestart()
-				.flow(step4).end()
-				.listener(jobExecutionListener(threadpooltaskExecutor()))
-				.build();
+				.flow(step4).end().listener(jobExecutionListener(threadpooltaskExecutor())).build();
 	}
 
 	@Bean
 	public Step step2() {
-		return stepBuilderFactory.get("step2").tasklet(new TaskOne()).build();
+		return stepBuilderFactory.get("step2").tasklet(new TaskOne())
+				.listener(stepListner)
+				.build();
 	}
 
 	@Bean
 	public Step step3() {
-		return stepBuilderFactory.get("step3").tasklet(new TaskTwo()).build();
+		return stepBuilderFactory.get("step3").tasklet(new TaskTwo())
+				.listener(stepListner)
+				.build();
 	}
 
 	@Bean
 	public Step step4() {
-		return stepBuilderFactory.get("step4").tasklet(new TaskThree()).build();
+		return stepBuilderFactory.get("step4").tasklet(new TaskThree())
+				.listener(stepListner)
+				.build();
 	}
+	
+	
 
 }
