@@ -13,7 +13,7 @@ public class SampleRetryService {
 	private static int COUNTER = 0;
 
 	@Retryable(value = { NumberFormatException.class,
-			NullPointerException.class }, maxAttempts = 5, backoff = @Backoff(delay = 1000, maxDelay = 2000)) 
+			NullPointerException.class }, maxAttempts = 15, backoff = @Backoff(delay = 1000, maxDelay = 2000)) 
 	public String retryWhenException() throws NumberFormatException, NullPointerException {
 		COUNTER++;
 		System.err.println("COUNTER = " + COUNTER);
@@ -33,4 +33,6 @@ public class SampleRetryService {
 		System.err.println("Recovered....!!");
 		return "Error Class :: " + t.getClass().getName();
 	}
+	
+	
 }
