@@ -96,10 +96,7 @@ public class BatchConfiguration {
 
 	@Autowired
 	private FlatFileItemReader<Sales> salesItemReader;
-	
-	private NumberFormatException nfex;
-	
-	private NullPointerException npex;
+
 	@Autowired
 	private CustomStepListener stepListner;
 	
@@ -108,9 +105,6 @@ public class BatchConfiguration {
 
 	@Autowired
 	private CustomItemWriterListener itemWriterListner;
-	
-	@Autowired
-	private SomeRetryableClass  someRetryableClass;
 	
 	@Bean("partitioner")
 	@StepScope

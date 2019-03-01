@@ -24,14 +24,14 @@ public class Application {
 		try {
 			System.err.println("Catastrophic condition...NullPointerException");
 			bean.myWeirdMethodWhichCanDitchMeAnytime1(null);
-			System.err.println("Recovered");
+			System.err.println("\n>>>>>>>>>>>>>>>>>   !!!     Recovered   !!!    <<<<<<<<<<<<<<<<<<<<\n");
 		} catch (Exception e) {
 			System.err.println("Not recovered: " + e);
 		}
 		try {
 			System.err.println("Catastrophic condition...NumberFormatException");
 			bean.myWeirdMethodWhichCanDitchMeAnytime2();
-			System.err.println("Recovered");
+			System.err.println("\n+++++++++++++++++   !!!     Recovered   !!!    ++++++++++++++++++++\n");
 		} catch (Exception e) {
 			System.err.println("Not recovered: " + e);
 		}
