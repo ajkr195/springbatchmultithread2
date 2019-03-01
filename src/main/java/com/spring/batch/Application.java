@@ -20,8 +20,6 @@ public class Application {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
-//		SampleRetryService bean = context.getBean(SampleRetryService.class);
-//		bean.retryWhenException();
 		SomeRetryableClass bean = context.getBean(SomeRetryableClass.class);
 		try {
 			System.err.println("Catastrophic condition...NullPointerException");
