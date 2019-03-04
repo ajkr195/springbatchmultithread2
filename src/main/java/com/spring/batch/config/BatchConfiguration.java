@@ -20,7 +20,7 @@ import org.springframework.batch.core.configuration.support.JobRegistryBeanPostP
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.partition.support.MultiResourcePartitioner;
 import org.springframework.batch.core.partition.support.Partitioner;
-//import org.springframework.batch.item.ItemWriter;
+//import org.springframework.batch.item.ItemWriter; 
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
@@ -41,10 +41,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.retry.backoff.FixedBackOffPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 
 import com.spring.batch.itemprocessor.SalesItemProcessor;
@@ -54,7 +52,6 @@ import com.spring.batch.listener.CustomStepListener;
 import com.spring.batch.listener.InterceptingJobExecution;
 import com.spring.batch.listener.JobCompletionNotificationListener;
 import com.spring.batch.model.Sales;
-import com.spring.batch.retry.SomeRetryableClass;
 import com.spring.batch.tasklets.TaskOne;
 import com.spring.batch.tasklets.TaskThree;
 import com.spring.batch.tasklets.TaskTwo;
@@ -221,6 +218,7 @@ public class BatchConfiguration {
 				// .skip(Exception.class)// .noSkip(FileNotFoundException.class)
 				// .retryLimit(3)// .retry(DeadlockLoserDataAccessException.class)
 				// .skip(FlatFileParseException.class) // .writer(compositeItemWriter())
+				// .allowStartIfComplete(true)
 				.listener(stepListner)
 				.listener(itemReaderListner)
 				.listener(itemWriterListner).build();
@@ -282,8 +280,9 @@ public class BatchConfiguration {
 	}
 
 	@Bean
-	public Step step3() {
+	public Step step3(PlatformTransactionManager transactionManager) {
 		return stepBuilderFactory.get("step3").tasklet(new TaskTwo())
+				.transactionManager(transactionManager) // Autowired in. No need to use this explicitely.
 				.listener(stepListner)
 				.build();
 	}
