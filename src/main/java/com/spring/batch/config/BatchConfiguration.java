@@ -62,21 +62,21 @@ import com.spring.batch.tasklets.TaskTwo;
 public class BatchConfiguration {
 
 	private static final Logger log = LoggerFactory.getLogger(BatchConfiguration.class);
-	@Value("${mycustom.batch.partition.size}")
+	@Value("${mycustom.batch.partition.size.int}")
 	private int mycustombatchpartitionsize;
-	@Value("${mycustom.batch.concurrency.size}")
+	@Value("${mycustom.batch.concurrency.size.int}")
 	private int mycustombatchconcurrencysize;
-	@Value("${mycustom.batch.throttle.limit}")
+	@Value("${mycustom.batch.throttle.limit.int}")
 	private int mycustombatchthrottlelimit;
-	@Value("${mycustom.batch.grid.size}")
+	@Value("${mycustom.batch.grid.size.int}")
 	private int mycustombatchgridsize;
-	@Value("${mycustom.batch.chunk.size}")
+	@Value("${mycustom.batch.chunk.size.int}")
 	private int mycustombatchchunksize;
-	@Value("${mycustom.batch.maxpool.size}")
+	@Value("${mycustom.batch.maxpool.size.int}")
 	private int mycustombatchmaxpoolsize;
-	@Value("${mycustom.batch.corepool.size}")
+	@Value("${mycustom.batch.corepool.size.int}")
 	private int mycustombatchcorepoolsize;
-	@Value("${mycustom.batch.queuecapacity.size}")
+	@Value("${mycustom.batch.queuecapacity.size.int}")
 	private int mycustombatchqueuecapacitysize;
 
 	@Autowired
