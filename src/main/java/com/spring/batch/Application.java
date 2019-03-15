@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.retry.annotation.EnableRetry;
+//import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.spring.batch.retry.SomeRetryableClass;
  
@@ -14,7 +14,6 @@ import com.spring.batch.retry.SomeRetryableClass;
 @EnableBatchProcessing
 @SpringBootApplication
 //@EnableScheduling
-@EnableRetry
 @ComponentScan({ "com.spring.batch.*" })
 public class Application {
 
@@ -22,18 +21,18 @@ public class Application {
 		ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
 		SomeRetryableClass bean = context.getBean(SomeRetryableClass.class);
 		try {
-			System.err.println("Catastrophic condition...NullPointerException");
+			System.err.println("\nCatastrophic condition...NullPointerException\n");
 			bean.myWeirdMethodWhichCanDitchMeAnytime1(null);
-			System.err.println("\n>>>>>>>>>>>>>>>>>   !!!     Recovered   !!!    <<<<<<<<<<<<<<<<<<<<\n");
+			System.err.println("\n   >>>   Recovered from NullPointerException   <<<   \n");
 		} catch (Exception e) {
-			System.err.println("Not recovered: " + e);
+			System.err.println("\n   !!!   Not recovered: " + e + "   !!!   \n");
 		}
 		try {
-			System.err.println("Catastrophic condition...NumberFormatException");
+			System.err.println("\nCatastrophic condition...NumberFormatException\n");
 			bean.myWeirdMethodWhichCanDitchMeAnytime2();
-			System.err.println("\n+++++++++++++++++   !!!     Recovered   !!!    ++++++++++++++++++++\n");
+			System.err.println("\n   >>>   Recovered from NumberFormatException   <<<   \n");
 		} catch (Exception e) {
-			System.err.println("Not recovered: " + e);
+			System.err.println("\n   !!!   Not recovered: " + e + "   !!!   \n");
 		}
 	}
 

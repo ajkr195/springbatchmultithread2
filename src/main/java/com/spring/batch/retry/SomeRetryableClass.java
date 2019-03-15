@@ -26,7 +26,9 @@ public class SomeRetryableClass {
 
 	@Recover
 	public String recover(NullPointerException npex) {
+		System.err.println("\n##########################################################");
 		System.err.println("In Recover method - To recover from Null Pointer Exception");
+		System.err.println("##########################################################\n");
 		return npex.getClass().getName();
 
 	}
@@ -44,7 +46,9 @@ public class SomeRetryableClass {
 
 	@Recover
 	public String recover(NumberFormatException nfex) {
+		System.err.println("\n###########################################################");
 		System.err.println("In Recover method - To recover from Number format Exception");
+		System.err.println("###########################################################\n");
 		return nfex.getClass().getName();
 
 	}
