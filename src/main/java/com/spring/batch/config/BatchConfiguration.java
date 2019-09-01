@@ -96,13 +96,13 @@ public class BatchConfiguration {
 
 	@Autowired
 	private CustomStepListener stepListner;
-	
+
 	@Autowired
 	private CustomItemReaderListener itemReaderListner;
 
 	@Autowired
 	private CustomItemWriterListener itemWriterListner;
-	
+
 	@Bean("partitioner")
 	@StepScope
 	public Partitioner partitioner() {
@@ -129,7 +129,7 @@ public class BatchConfiguration {
 		taskExecutor.setThreadNamePrefix("CSV2DB-");
 		taskExecutor.afterPropertiesSet();
 		return taskExecutor;
-	} 
+	}
 
 	@Bean
 	public TaskExecutor asynctaskExecutor() {
@@ -197,8 +197,8 @@ public class BatchConfiguration {
 
 	@Bean
 	public Job importSalesJob(JobCompletionNotificationListener jobCompletionListener, Step step1) {
-		return jobBuilderFactory.get("importSalesJob").incrementer(new RunIdIncrementer()).listener(jobCompletionListener)
-				.flow(masterStep()).end().build();
+		return jobBuilderFactory.get("importSalesJob").incrementer(new RunIdIncrementer())
+				.listener(jobCompletionListener).flow(masterStep()).end().build();
 	}
 
 	@SuppressWarnings("unused")
@@ -219,16 +219,13 @@ public class BatchConfiguration {
 				// .retryLimit(3)// .retry(DeadlockLoserDataAccessException.class)
 				// .skip(FlatFileParseException.class) // .writer(compositeItemWriter())
 				// .allowStartIfComplete(true)
-				.listener(stepListner)
-				.listener(itemReaderListner)
-				.listener(itemWriterListner).build();
+				.listener(stepListner).listener(itemReaderListner).listener(itemWriterListner).build();
 	}
 
 	@Bean
 	public JobExecutionListener jobExecutionListener(ThreadPoolTaskExecutor executor) {
 		return new JobExecutionListener() {
-			private ThreadPoolTaskExecutor taskExecutor = executor;
-
+//			private ThreadPoolTaskExecutor taskExecutor = executor;
 			@Override
 			public void beforeJob(JobExecution jobExecution) {
 				log.info(
@@ -240,10 +237,10 @@ public class BatchConfiguration {
 			@Override
 			public void afterJob(JobExecution jobExecution) {
 				log.info("This message is \"after\" the job. You might want to do something here - After the job.");
-				
+
 				System.err.println(
 						"This message is \"after\" the job. You might want to do something here - After the job.");
-				taskExecutor.shutdown();
+				executor.shutdown();
 			}
 		};
 	}
@@ -274,26 +271,19 @@ public class BatchConfiguration {
 
 	@Bean
 	public Step step2() {
-		return stepBuilderFactory.get("step2").tasklet(new TaskOne())
-				.listener(stepListner)
-				.build();
+		return stepBuilderFactory.get("step2").tasklet(new TaskOne()).listener(stepListner).build();
 	}
 
 	@Bean
 	public Step step3(PlatformTransactionManager transactionManager) {
-		return stepBuilderFactory.get("step3").tasklet(new TaskTwo())
-				.transactionManager(transactionManager) // Autowired in. No need to use this explicitely.
-				.listener(stepListner)
-				.build();
+		// Autowired in. No need to use this explicitely.
+		return stepBuilderFactory.get("step3").tasklet(new TaskTwo()).transactionManager(transactionManager)
+				.listener(stepListner).build();
 	}
 
 	@Bean
 	public Step step4() {
-		return stepBuilderFactory.get("step4").tasklet(new TaskThree())
-				.listener(stepListner)
-				.build();
+		return stepBuilderFactory.get("step4").tasklet(new TaskThree()).listener(stepListner).build();
 	}
-	
-	
 
 }
