@@ -1,5 +1,7 @@
 # Spring Batch with Spring Cloud DataFlow Procedure
 
+# Works only with Java 1.8
+
 Download these jars - 
 
 https://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.7.4.RELEASE/spring-cloud-dataflow-server-local-1.7.4.RELEASE.jar
