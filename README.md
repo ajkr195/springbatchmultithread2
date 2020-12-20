@@ -4,11 +4,10 @@ Download these jars -
 
 https://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-local/1.7.4.RELEASE/spring-cloud-dataflow-server-local-1.7.4.RELEASE.jar
 
+https://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/2.7.0-RC1/spring-cloud-dataflow-shell-2.7.0-RC1.jar
 
-http://repo.spring.io/milestone/org/springframework/cloud/spring-cloud-dataflow-shell/1.7.4.RELEASE/spring-cloud-dataflow-shell-1.7.4.RELEASE.jar
 
-
-Run the first jars  
+Run the first jar 
 
 
 java -jar spring-cloud-dataflow-server-local-1.7.4.RELEASE.jar
@@ -25,7 +24,7 @@ Browse to http://localhost:9393/dashboard
 
 Run the second jar:
 
-java -jar spring-cloud-dataflow-shell-1.7.4.RELEASE.jar
+java -jar spring-cloud-dataflow-shell-2.7.0-RC1.jar
 
 
 You will get -- 
