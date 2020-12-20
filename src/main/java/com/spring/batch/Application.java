@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.spring.batch.retry.SomeRetryableClass;
- 
+
 @EnableTask
 @EnableBatchProcessing
 @SpringBootApplication
@@ -18,6 +18,9 @@ import com.spring.batch.retry.SomeRetryableClass;
 public class Application {
 
 	public static void main(String[] args) {
+
+//		 SpringApplication.run(Application.class, args);
+
 		ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
 		SomeRetryableClass bean = context.getBean(SomeRetryableClass.class);
 		try {
