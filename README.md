@@ -6,18 +6,22 @@ https://dataflow.spring.io/docs/installation/
 
 https://dataflow.spring.io/docs/installation/local/manual/
 
+Batch only mode - https://dataflow.spring.io/docs/recipes/batch/batch-only-mode/
+
 Download these jars- 
 
+https://repo.spring.io/release/org/springframework/cloud/spring-cloud-skipper-server/2.6.0/spring-cloud-skipper-server-2.6.0.jar
 
 https://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server/2.7.0/spring-cloud-dataflow-server-2.7.0.jar
 
 https://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-shell/2.7.0/spring-cloud-dataflow-shell-2.7.0.jar
 
 
-Run the first jar 
+Run the jars in this sequence:
 
+1. java -jar spring-cloud-skipper-server-2.6.0.jar
 
-java -jar spring-cloud-dataflow-server-2.7.0.jar
+2. java -jar spring-cloud-dataflow-server-2.7.0.jar
 
 or 
 
@@ -28,11 +32,11 @@ java -jar spring-cloud-dataflow-server-2.7.0.jar --spring.datasource.url=jdbc:my
 
 Browse to http://localhost:9393/dashboard
 
-Use the UI to create Application and Task or follow below instructions to do it command line way:
+Use the UI to create Application and Task (refer Screenshots section) or follow below instructions to do it command line way:
 
-Run the second jar:
+Run the third jar (Optional, if you want to use SCDF Shell):
 
-java -jar spring-cloud-dataflow-shell-2.7.0.jar
+3. java -jar spring-cloud-dataflow-shell-2.7.0.jar
 
 
 You will get -- 
@@ -56,3 +60,33 @@ app register --name batchdbmultithread --type task --uri file:///parth/to/your/b
 
 
 task create batchdbmultithread --definition batchdbmultithread
+
+
+# Screenshots
+
+<h4> Register App and Creating Task Using SCDF UI </h4>
+
+![springbootrocks](https://github.com/ajkr195/springbatchmultithread2/blob/master/screenshots/registerapp.jpg)
+
+![springbootrocks](https://github.com/ajkr195/springbatchmultithread2/blob/master/screenshots/appregd.jpg)
+
+![springbootrocks](https://github.com/ajkr195/springbatchmultithread2/blob/master/screenshots/createtask.jpg)
+
+![springbootrocks](https://github.com/ajkr195/springbatchmultithread2/blob/master/screenshots/taskcreated.jpg)
+
+![springbootrocks](https://github.com/ajkr195/springbatchmultithread2/blob/master/screenshots/taskcreated2.jpg)
+
+![springbootrocks](https://github.com/ajkr195/springbatchmultithread2/blob/master/screenshots/launchtask.jpg)
+
+
+
+Batch only mode config (optional)
+
+export SPRING_CLOUD_DATAFLOW_FEATURES_STREAMS_ENABLED=false<br>
+export SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=false<br>
+export SPRING_CLOUD_DATAFLOW_FEATURES_TASKS_ENABLED=true<br>
+export spring_datasource_url=jdbc:mariadb://localhost:3306/task<br>
+export spring_datasource_username=root<br>
+export spring_datasource_password=password<br>
+export spring_datasource_driverClassName=org.mariadb.jdbc.Driver<br>
+export spring_datasource_initialization_mode=always<br>
